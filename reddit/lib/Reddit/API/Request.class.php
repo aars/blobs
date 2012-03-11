@@ -71,9 +71,9 @@ class Reddit_API_Request {
 
   public function from_log ($file) 
   {
-    $this->contents = file_get_contents($file);
+    $this->contents = gzinflate(file_get_contents($file));
 
-    preg_match('/_([0-9]{4})([0-9]{2})([0-9]{2})-([0-9]{2})([0-9]{2}).log$/', $file, $t);
+    preg_match('/_([0-9]{4})([0-9]{2})([0-9]{2})-([0-9]{2})([0-9]{2}).log.gz$/', $file, $t);
     $this->timestamp = mktime($t[4], $t[5], 0, $t[2], $t[3], $t[1]);
     
     $this->fresh = false;

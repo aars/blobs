@@ -4,16 +4,23 @@ class Reddit_API {
 
   private $request;
 
+  public $offline;
+
   public function __construct () {
   }
 
-  static function load ($kind, $name, $uri) {
+  static function load ($kind, $name, $uri, $offline = false) {
     $kind = ucfirst($kind);
-    $name = ucfirst($name);
+    $name = ucfirst(strtolower($name));
 
     _log("\r\n[Loading] $name ($uri)");
 
     $logged = Reddit_Log::find($kind . '_' . $name);
+
+    if ($offline && empty($logged))
+      throw new Reddit_API_NoLogException(
+        'No logs found for ' . Reddit_Log::filename($kind . '_' . $name)
+      );
 
     if (!empty($logged)) {
       $request = new Reddit_API_Request();
@@ -45,16 +52,23 @@ class Reddit_API {
 
   public function frontpage ()
   {
-    $frontpage = self::load('Listing', 'Frontpage', '/');
+    $frontpage = self::load('Listing', 'Frontpage', '/', $this->offline);
 
     return $frontpage;
   }
 
   public function all ()
   {
-    $all = self::load('Listing', 'All', 'r/all');
+    $all = self::load('Listing', 'All', 'r/all', $this->offline);
 
     return $all;
+  }
+  
+  public function subreddit ($name)
+  {
+    $subreddit = self::load('Listing', $name, 'r/' . $name, $this->offline);
+
+    return $subreddit;
   }
 
   function get_subreddits (Reddit_Data $data)
@@ -92,4 +106,6 @@ class Reddit_API {
   }
 }
 
+class Reddit_API_Exception extends Exception {};
+class Reddit_API_NoLogException extends Reddit_API_Exception {};
 ?>

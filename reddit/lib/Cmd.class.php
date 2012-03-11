@@ -11,6 +11,8 @@ abstract class Cmd {
     'action' => 1
   );
 
+  public $sub_args = array();
+
   public function __construct ($argv)
   {
     _log('Empty command');
@@ -22,8 +24,21 @@ abstract class Cmd {
     $this->cmd  = basename($argv[0]);
 
     $args = array_merge($this->_args, $this->args);
-    foreach ($args as $key => $index)
-      $this->$key = !empty($argv[$index]) ? $argv[$index] : false;
+    foreach ($args as $key => $index) {
+      $arg = !empty($argv[$index]) ? $argv[$index] : false;
+      
+      if ($arg && strstr($arg, ':'))
+      {
+        $pos      = strpos($arg, ':');
+        $main_arg = substr($arg, 0, $pos);
+        $sub_arg  = substr($arg, $pos+1);
+        $this->sub_args[$main_arg] = $sub_arg;
+        
+        $arg = $main_arg;
+      }
+
+      $this->$key = $arg;
+    }
   }
 }
 

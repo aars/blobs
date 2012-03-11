@@ -25,10 +25,10 @@ class Reddit_Log_Item
 
   public function filename()
   {
-    $filename = sprintf('%s/%s_%s_%s.log',
+    $filename = sprintf('%s/%s_%s_%s.log.gz',
       realpath(Config::get('log.dir')),
       $this->logbase,
-      $this->name,
+      ucfirst(strtolower($this->name)),
       $this->datetime()
     );
 
@@ -44,7 +44,8 @@ class Reddit_Log_Item
    
     _log('writing logfile: ' . $filename);
 
-    file_put_contents($filename, $this->logdata);
+    $compressed = gzdeflate($this->logdata);
+    file_put_contents($filename, $compressed);
   }
 }
 ?>

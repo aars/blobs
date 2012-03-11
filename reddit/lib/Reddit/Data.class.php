@@ -28,8 +28,7 @@ class Reddit_Data {
     } catch (Exception $e) {
       throw new Reddit_Data_Exception('Could not parse request data');
     }
-    
-    
+
     // Unknown structure?
     if (!isset($data['kind']) && !isset($data[0]['kind']))
       throw new Reddit_Data_Exception('Unknown data structure');
@@ -41,7 +40,6 @@ class Reddit_Data {
 
     foreach($data as $set) {
       if ($set['kind'] != $this->kind) {
-        print_r($data);
         throw new Reddit_Data_Exception('Request data is not a ' . $this->kind . '(' . $set['kind'] . ')');
       }
       foreach ($set['data']['children'] as $item) {
@@ -60,6 +58,11 @@ class Reddit_Data {
         $this->children[$item->id] = $item;
       }
     } 
+  }
+
+  public function show () 
+  {
+    _log("- Kind\t: " . $this->kind . "\r\n");    
   }
 
   public function __toString()

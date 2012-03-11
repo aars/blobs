@@ -19,11 +19,18 @@ class Reddit_Log {
       echo $data . "\r\n";
   }
 
-  static function find ($name, $date = false)
+  static function filename ($name)
   {
-    $date  = date(str_replace('i', '*', Config::get('datetime.log')));
+    $date = date(str_replace('i', '*', Config::get('datetime.log')));
+    $filename = $name . '_' . $date . '.log.gz';
+
+    return $filename;
+  }
+
+  static function find ($name)
+  {
     $dir   = realpath(Config::get('log.dir'));
-    $files = glob($dir . '/' . $name . '_' . $date . '.log');
+    $files = glob($dir . '/' . self::filename($name));
 
     if (!empty($files)) {
       Reddit::log(sprintf("Logs (%s) found:\r\n\t%s", 

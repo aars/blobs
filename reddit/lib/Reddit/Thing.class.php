@@ -4,7 +4,7 @@ class Reddit_Thing
 {
   public $kind = 'Thing';
 
-  private $basic_properties = array(
+  public $basic_properties = array(
     'id'      => 'id',  
     'name'    => 'name',
   );

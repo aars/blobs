@@ -13,7 +13,7 @@ class Reddit_Thing_Link extends Reddit_Thing
     'downs'   => 'downs',
     'sub'     => 'subreddit',
     'sub_id'  => 'subreddit_id',
-    'timestamp' => 'created_utc'
+    'timestamp' => 'created_utc',
     'comments' => 'num_comments'
   );
   
