@@ -1,0 +1,12 @@
+#!/usr/bin/php
+<?php
+
+require 'lib/main.inc.php';
+require 'lib/autoload.php';
+
+if (empty($argv[1]))
+  die(usage());
+
+_do($argv);
+
+?>
