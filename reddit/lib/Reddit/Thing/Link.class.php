@@ -5,7 +5,15 @@ class Reddit_Thing_Link extends Reddit_Thing
   public $kind = 'Link';
 
   public $properties = array(
-    'uri'      => 'url',
+    'title'    => 'title',
+    'uri'      => 'permalink',
+    'url'      => 'url',
+    'score'   => 'score',
+    'ups'     => 'ups',
+    'downs'   => 'downs',
+    'sub'     => 'subreddit',
+    'sub_id'  => 'subreddit_id',
+    'timestamp' => 'created_utc'
     'comments' => 'num_comments'
   );
   

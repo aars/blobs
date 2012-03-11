@@ -4,43 +4,92 @@ class Reddit_API {
 
   private $request;
 
-  public $frontpage;
-
   public function __construct () {
   }
 
-  public function frontpage () {
-    $logged = Reddit_Log::find('Listing_Frontpage');
+  static function load ($kind, $name, $uri) {
+    $kind = ucfirst($kind);
+    $name = ucfirst($name);
+
+    _log("\r\n[Loading] $name ($uri)");
+
+    $logged = Reddit_Log::find($kind . '_' . $name);
 
     if (!empty($logged)) {
       $request = new Reddit_API_Request();
       $request->from_log($logged[0]);
     } else {
-      $request = new Reddit_API_Request('/', array(
-          'limit' => Config::get('request.limit'),
-          'kind'  => 'comment'
+      $request = new Reddit_API_Request($uri, array(
+          'limit' => Config::get('request.limit')
         ));
     }
-
-    _log('Loading Frontpage');
-    
-    $this->frontpage = new Reddit_Listing($request);
+   
+    $classname = 'Reddit_' . $kind;
+    $object    = new $classname($request);
 
     if (Config::get('log.active'))
     {
       if ($request->fresh)
       {
-        Reddit::log($this->frontpage, 'Frontpage');
+        Reddit::log($object, $name);
       } else {
-        Reddit::log(sprintf('Frontpage loaded from logfile: %s', 
+        Reddit::log(sprintf('%s loaded from logfile: %s',
+          $name,
           date(Config::get('datetime.human'), $request->timestamp)
           ));
       }
     }
 
-    return $this->frontpage; 
+    return $object;
   }
 
+  public function frontpage ()
+  {
+    $frontpage = self::load('Listing', 'Frontpage', '/');
+
+    return $frontpage;
+  }
+
+  public function all ()
+  {
+    $all = self::load('Listing', 'All', 'r/all');
+
+    return $all;
+  }
+
+  function get_subreddits (Reddit_Data $data)
+  {
+
+    $list = array();
+    foreach ($data->children as $id => $item) {
+      $list[] = array(
+        'kind' => 'Listing',
+        'name' => $item->sub,
+        'uri'  => 'r/' . $item->sub
+      );
+    }
+    $this->timer($list); 
+  }
+
+  function get_comments (Reddit_Data $data)
+  {
+    $list = array();
+    foreach ($data->children as $id => $item)
+    {
+      $list[] = array(
+        'kind' => 'Listing',
+        'name' => 'Comments-' . $item->id,
+        'uri'  => $item->uri,
+        'query' => array()
+      );
+    }
+    $this->timer($list); 
+  }
+
+  function timer ($list)
+  {
+    $timer = new Reddit_API_RequestTimer($list);
+  }
 }
 
 ?>

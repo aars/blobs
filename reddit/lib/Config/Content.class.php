@@ -16,7 +16,7 @@ class Config_Content {
   {
     $parts = explode('.', $key);
   
-      if(empty($this->content[$parts[0]][$parts[1]]))
+      if(!isset($this->content[$parts[0]][$parts[1]]))
         throw new ConfigKeyException();
 
     return $this->content[$parts[0]][$parts[1]];
@@ -24,7 +24,6 @@ class Config_Content {
 
   private function parse($root)
   {
-    // Read config file from outside repository
     $file = realpath($this->dir . '/' . $this->file);
     
     if(!file_exists($file))

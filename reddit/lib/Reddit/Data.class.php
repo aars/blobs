@@ -19,31 +19,47 @@ class Reddit_Data {
   private function parse ($data)
   {
     _log('Loading data...');
+   
+    if (empty($data))
+      throw new Reddit_Data_Exception('Empty!');
+
     try {
       $data = json_decode($data, true);
     } catch (Exception $e) {
       throw new Reddit_Data_Exception('Could not parse request data');
     }
     
-    if ($data['kind'] != $this->kind)
-      throw new Reddit_Data_Exception('Request data is not not a ' . $this->kind);
-   
-    foreach ($data['data']['children'] as $item) {
-      try {
-        $kind = Config::get('kind_id.' . $item['kind']);
-      } catch(Exception $e) {
-        throw new Reddit_Data_Exception('Unknown kind ' . $item['kind']);
-      }
-
-      $classname = 'Reddit_Thing_' . ucfirst($kind);
-      if (!class_exists($classname))
-        throw new Reddit_Data_Exception('No class to handle ' . $kind);
-      
-      $item = new $classname($item['data']);
-      
-      $this->children[$item->id] = $item;
-    }
     
+    // Unknown structure?
+    if (!isset($data['kind']) && !isset($data[0]['kind']))
+      throw new Reddit_Data_Exception('Unknown data structure');
+
+    // Make "multiple" sets
+    $data = !isset($data['kind']) 
+      ? $data
+      : array($data);
+
+    foreach($data as $set) {
+      if ($set['kind'] != $this->kind) {
+        print_r($data);
+        throw new Reddit_Data_Exception('Request data is not a ' . $this->kind . '(' . $set['kind'] . ')');
+      }
+      foreach ($set['data']['children'] as $item) {
+        try {
+          $kind = Config::get('kind_id.' . $item['kind']);
+        } catch(Exception $e) {
+          throw new Reddit_Data_Exception('Unknown kind ' . $item['kind']);
+        }
+
+        $classname = 'Reddit_Thing_' . ucfirst($kind);
+        if (!class_exists($classname))
+          throw new Reddit_Data_Exception('No class to handle ' . $kind);
+        
+        $item = new $classname($item['data']);
+        
+        $this->children[$item->id] = $item;
+      }
+    } 
   }
 
   public function __toString()

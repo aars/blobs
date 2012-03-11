@@ -1,14 +1,12 @@
 <?php
 
-class Reddit_API_Request_Exception extends Exception {};
-class Reddit_API_Request_GetException Extends Reddit_API_Request_Exception {};
-
 class Reddit_API_Request {
   
   private $req;
 
   public $fresh = true;
 
+  public $uri;
   public $url;
   
   public $base      = 'http://www.reddit.com';
@@ -32,6 +30,12 @@ class Reddit_API_Request {
       ? $uri 
       : '/' . $uri;
 
+    $uri = (preg_match('/\/$/', $uri))
+      ? $uri
+      : $uri . '/';
+
+    $this->uri = $uri;
+
     if (is_array($query)) $query = http_build_query($query);
 
     return $this->base . $uri . '.' . $this->format . '?' . $query;
@@ -52,11 +56,15 @@ class Reddit_API_Request {
     if (!$this->url)
       $this->uri($uri);
 
-    Reddit_Log::log('Getting fresh copy of ' . $this->url);
+    Reddit_Log::log('Getting fresh copy of ' . $this->uri);
 
     $this->timestamp = time();
 
-    $this->contents = file_get_contents($this->url);
+    try {
+      $this->contents = file_get_contents($this->url);
+    } catch (Exception $e) {
+      throw Reddit_API_Request_GetException($e->getMessage());
+    }
 
     return $this->contents;
   }
@@ -73,5 +81,8 @@ class Reddit_API_Request {
     return true;
   }
 }
+
+class Reddit_API_Request_Exception extends Exception {};
+class Reddit_API_Request_GetException Extends Reddit_API_Request_Exception {};
 
 ?>
